@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-5219614295498831">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShortLink - URL Shortener</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #93c5fd;
+            --primary-dark: #1d4ed8;
+            --dark-bg: #1e293b;
+            --dark-card: #334155;
+            --dark-text: #f1f5f9;
+            --light-bg: #f8fafc;
+            --light-card: #ffffff;
+            --light-text: #1e293b;
+            --text-secondary: #64748b;
+            --success: #10b981;
+            --error: #ef4444;
+            --border: #e2e8f0;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: var(--light-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.dark-mode {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-item {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .nav-item {
+            color: var(--dark-text);
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .theme-toggle {
+            background: var(--light-card);
+            border: 1px solid var(--border);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: var(--dark-card);
+            border-color: #475569;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+            max-width: 1200px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+            max-width: 700px;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 16px;
+            color: var(--light-text);
+        }
+
+        body.dark-mode .hero h1 {
+            color: var(--dark-text);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--light-card);
+            border-radius: 20px;
+            padding: 32px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        body.dark-mode .card {
+            background: var(--dark-card);
+            border-color: #475569;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Input Group */
+        .input-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .input-group input {
+            flex: 1;
+            min-width: 250px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--light-bg);
+            color: var(--light-text);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .input-group input {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+            border-color: #475569;
+        }
+
+        .input-group input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Result Container */
+        .result-container {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+            margin-top: 24px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 16px;
+            transition: transform 0.3s ease;
+            flex-wrap: wrap;
+        }
+
+        body.dark-mode .result-card {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .result-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .short-url {
+            flex: 1;
+            font-size: 1.1rem;
+            word-break: break-all;
+            color: var(--primary);
+            font-weight: 600;
+            min-width: 250px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .copy-btn, .qr-btn {
+            background: var(--primary);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover, .qr-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .qr-btn {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .qr-container {
+            display: none;
+            margin-top: 24px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(59, 130, 246, 0.03);
+            border-radius: 16px;
+        }
+
+        body.dark-mode .qr-container {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .qr-container canvas {
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .qr-title {
+            margin-top: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        /* History */
+        .history {
+            width: 100%;
+            max-width: 700px;
+            display: none;
+        }
+
+        .history h2 {
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 20px;
+            background: var(--light-card);
+            border-radius: 16px;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        body.dark-mode .history-item {
+            background: var(--dark-card);
+            border-color: #475569;
+        }
+
+        .history-item:hover {
+            transform: translateX(8px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-url {
+            flex: 1;
+            font-size: 0.95rem;
+            word-break: break-all;
+            color: var(--text-secondary);
+            min-width: 250px;
+        }
+
+        body.dark-mode .history-url {
+            color: #94a3b8;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 12px;
+            margin-left: 20px;
+        }
+
+        .history-short {
+            color: var(--primary);
+            font-weight: 600;
+            margin-right: 16px;
+        }
+
+        /* Profile */
+        .profile {
+            display: none;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .profile h2 {
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-card {
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+            background: var(--light-card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease;
+        }
+
+        body.dark-mode .profile-card {
+            background: var(--dark-card);
+            border-color: #475569;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .profile-info p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(59, 130, 246, 0.05);
+            transition: transform 0.3s ease;
+            min-width: 120px;
+        }
+
+        body.dark-mode .stat-item {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* Settings */
+        .settings {
+            display: none;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .settings h2 {
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+        body.dark-mode .setting-item {
+            border-bottom-color: #475569;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .setting-label span:first-child {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .setting-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: var(--transition);
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            max-width: 1200px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--success);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Redirect page */
+        .redirect-page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .redirect-content {
+            max-width: 600px;
+            width: 100%;
+            background: var(--light-card);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        body.dark-mode .redirect-content {
+            background: var(--dark-card);
+            border-color: #475569;
+        }
+
+        .redirect-page h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .redirect-page p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            color: var(--light-text);
+        }
+
+        body.dark-mode .redirect-page p {
+            color: var(--dark-text);
+        }
+
+        .countdown {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 24px 0;
+            font-size: 2.2rem;
+        }
+
+        /* Bulk Mode */
+        .bulk-mode {
+            margin-top: 24px;
+            padding: 24px;
+            background: rgba(59, 130, 246, 0.03);
+            border-radius: 16px;
+            display: none;
+        }
+
+        body.dark-mode .bulk-mode {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .bulk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .bulk-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-bulk {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-bulk:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .bulk-input {
+            width: 100%;
+            min-height: 150px;
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--light-bg);
+            color: var(--light-text);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .bulk-input {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+            border-color: #475569;
+        }
+
+        .bulk-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+        }
+
+        /* Bulk Results */
+        .bulk-results {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .bulk-result-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 18px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        body.dark-mode .bulk-result-item {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .bulk-original {
+            flex: 1;
+            font-size: 0.95rem;
+            word-break: break-all;
+            color: var(--text-secondary);
+            min-width: 250px;
+        }
+
+        body.dark-mode .bulk-original {
+            color: #94a3b8;
+        }
+
+        .bulk-short-url {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .bulk-short {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1rem;
+            word-break: break-all;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .result-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .history-actions {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 12px;
+                margin-left: 0;
+            }
+            
+            .notification {
+                bottom: 80px;
+                right: 16px;
+                left: 16px;
+                padding: 12px 20px;
+                font-size: 1rem;
+                max-width: calc(100% - 32px);
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card {
+                padding: 24px;
+            }
+            
+            .btn {
+                padding: 14px 20px;
+                font-size: 0.95rem;
+            }
+            
+            .short-url {
+                font-size: 1rem;
+            }
+            
+            .history-url {
+                font-size: 0.9rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-link"></i>
+            <span>ShortLink</span>
+        </div>
+        <nav class="nav">
+            <div class="nav-item active" data-tab="shortener">Shortener</div>
+            <div class="nav-item" data-tab="history">History</div>
+            <div class="nav-item" data-tab="profile">Profile</div>
+            <div class="nav-item" data-tab="settings">Settings</div>
+        </nav>
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </header>
+
+    <main class="main-content">
+        <div class="hero">
+            <h1>Shorten Your URLs Instantly</h1>
+            <p>Paste your long URLs and get short, shareable links in seconds. No sign-up required!</p>
+        </div>
+
+        <!-- Shortener Tab -->
+        <div class="card" id="shortenerTab">
+            <div class="input-group">
+                <input type="url" id="longUrl" placeholder="Paste your long URL here..." required>
+                <button class="btn btn-outline" id="pasteBtn">
+                    <i class="fas fa-paste"></i> Paste
+                </button>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-primary" id="shortenBtn">
+                    <i class="fas fa-cut"></i> Shorten URL
+                </button>
+                <button class="btn btn-outline" id="bulkToggleBtn">
+                    <i class="fas fa-list"></i> Bulk Mode
+                </button>
+            </div>
+            
+            <div class="bulk-mode" id="bulkMode" style="display: none;">
+                <div class="bulk-header">
+                    <h3>Bulk URL Shortening</h3>
+                    <button class="close-bulk" id="closeBulkBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <textarea class="bulk-input" id="bulkInput" placeholder="Paste multiple URLs (one per line)"></textarea>
+                <div class="btn-group">
+                    <button class="btn btn-outline" id="bulkPasteBtn">
+                        <i class="fas fa-paste"></i> Paste
+                    </button>
+                    <button class="btn btn-primary" id="bulkShortenBtn">
+                        <i class="fas fa-cut"></i> Shorten All URLs
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bulk-results" id="bulkResults">
+                <!-- Bulk results will be added here -->
+            </div>
+            
+            <div class="result-container" id="resultContainer">
+                <div class="result-card">
+                    <div class="short-url" id="shortUrl">https://shortlink.app/abc123</div>
+                    <div class="action-buttons">
+                        <button class="copy-btn" id="copyBtn" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="qr-btn" id="qrBtn" title="Generate QR code">
+                            <i class="fas fa-qrcode"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="qr-container" id="qrContainer">
+                    <div id="qrCode"></div>
+                    <div class="qr-title">Scan to visit the link</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div class="history" id="historyTab">
+            <h2><i class="fas fa-history"></i> Your Shortened URLs</h2>
+            <div class="history-list" id="historyList">
+                <!-- History items will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div class="profile" id="profileTab">
+            <h2><i class="fas fa-user-circle"></i> Your Profile</h2>
+            <div class="profile-card">
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-info">
+                    <h3>Anonymous User</h3>
+                    <p>Since you're not signed in, your links are stored locally in your browser.</p>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalLinks">0</div>
+                            <div class="stat-label">Total Links</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalClicks">0</div>
+                            <div class="stat-label">Total Clicks</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="settings" id="settingsTab">
+            <h2><i class="fas fa-cog"></i> Settings</h2>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Dark Mode</span>
+                    <span class="setting-desc">Toggle dark/light theme</span>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Auto Copy</span>
+                    <span class="setting-desc">Automatically copy shortened URL to clipboard</span>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="autoCopyToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Clear History</span>
+                    <span class="setting-desc">Remove all your shortened URLs</span>
+                </div>
+                <button class="btn btn-outline" id="clearHistoryBtn">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>ShortLink &copy;  | Shorten URLs with style</p>
+    </footer>
+    
+    <!-- Notification element -->
+    <div class="notification" id="notification">Copied to clipboard!</div>
+
+    <!-- Redirect Page -->
+    <div class="redirect-page" id="redirectPage">
+        <div class="redirect-content">
+            <h1>Redirecting...</h1>
+            <p id="redirectMessage">You are being redirected to the original URL.</p>
+            <div class="countdown" id="countdown">5</div>
+            <p>If you are not redirected automatically, <a id="redirectLink" href="#">click here</a>.</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const longUrlInput = document.getElementById('longUrl');
+        const pasteBtn = document.getElementById('pasteBtn');
+        const shortenBtn = document.getElementById('shortenBtn');
+        const bulkToggleBtn = document.getElementById('bulkToggleBtn');
+        const closeBulkBtn = document.getElementById('closeBulkBtn');
+        const bulkMode = document.getElementById('bulkMode');
+        const bulkInput = document.getElementById('bulkInput');
+        const bulkShortenBtn = document.getElementById('bulkShortenBtn');
+        const bulkPasteBtn = document.getElementById('bulkPasteBtn');
+        const bulkResults = document.getElementById('bulkResults');
+        const resultContainer = document.getElementById('resultContainer');
+        const shortUrlElement = document.getElementById('shortUrl');
+        const copyBtn = document.getElementById('copyBtn');
+        const qrBtn = document.getElementById('qrBtn');
+        const qrContainer = document.getElementById('qrContainer');
+        const qrCode = document.getElementById('qrCode');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const autoCopyToggle = document.getElementById('autoCopyToggle');
+        const totalLinksElement = document.getElementById('totalLinks');
+        const totalClicksElement = document.getElementById('totalClicks');
+        const navItems = document.querySelectorAll('.nav-item');
+        const tabs = {
+            shortener: document.getElementById('shortenerTab'),
+            history: document.getElementById('historyTab'),
+            profile: document.getElementById('profileTab'),
+            settings: document.getElementById('settingsTab')
+        };
+        const notification = document.getElementById('notification');
+        const redirectPage = document.getElementById('redirectPage');
+        const redirectMessage = document.getElementById('redirectMessage');
+        const countdownElement = document.getElementById('countdown');
+        const redirectLink = document.getElementById('redirectLink');
+
+        // State
+        let urlHistory = JSON.parse(localStorage.getItem('urlHistory')) || [];
+        let darkMode = localStorage.getItem('darkMode') === 'true';
+        let autoCopy = localStorage.getItem('autoCopy') !== 'false';
+
+        // Check if we're on a redirect page (URL has a hash)
+        const urlParams = new URLSearchParams(window.location.search);
+        const shortCode = urlParams.get('code');
+        
+        if (shortCode) {
+            handleRedirect(shortCode);
+        } else {
+            // Initialize the main app
+            init();
+        }
+
+        // Handle redirect
+        function handleRedirect(code) {
+            // Hide main app, show redirect page
+            document.querySelector('header').style.display = 'none';
+            document.querySelector('main').style.display = 'none';
+            document.querySelector('footer').style.display = 'none';
+            redirectPage.style.display = 'flex';
+            
+            // Find the original URL
+            const entry = urlHistory.find(item => item.shortCode === code);
+            
+            if (entry) {
+                // Update redirect message
+                redirectMessage.textContent = `Redirecting to: ${entry.longUrl}`;
+                redirectLink.href = entry.longUrl;
+                
+                // Increment click count
+                entry.clicks = (entry.clicks || 0) + 1;
+                localStorage.setItem('urlHistory', JSON.stringify(urlHistory));
+                
+                // Start countdown
+                let countdown = 5;
+                countdownElement.textContent = countdown;
+                
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        window.location.href = entry.longUrl;
+                    }
+                }, 1000);
+            } else {
+                redirectMessage.textContent = 'Short URL not found. It may have been deleted.';
+                redirectLink.style.display = 'none';
+                countdownElement.style.display = 'none';
+            }
+        }
+
+        // Initialize
+        function init() {
+            // Set theme (light mode is default)
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                darkModeToggle.checked = true;
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                darkModeToggle.checked = false;
+            }
+            
+            // Set auto copy
+            autoCopyToggle.checked = autoCopy;
+            
+            // Load history
+            renderHistory();
+            updateProfileStats();
+            
+            // Set active tab
+            showTab('shortener');
+        }
+
+        // Theme Toggle
+        themeToggle.addEventListener('click', () => {
+            darkMode = !darkMode;
+            localStorage.setItem('darkMode', darkMode);
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                darkModeToggle.checked = true;
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                darkModeToggle.checked = false;
+            }
+        });
+
+        // Dark Mode Toggle in Settings
+        darkModeToggle.addEventListener('change', () => {
+            darkMode = darkModeToggle.checked;
+            localStorage.setItem('darkMode', darkMode);
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        });
+
+        // Auto Copy Toggle
+        autoCopyToggle.addEventListener('change', () => {
+            autoCopy = autoCopyToggle.checked;
+            localStorage.setItem('autoCopy', autoCopy);
+        });
+
+        // Navigation
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const tab = item.getAttribute('data-tab');
+                showTab(tab);
+                
+                // Update active state
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        function showTab(tabName) {
+            // Hide all tabs
+            Object.values(tabs).forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Show selected tab
+            tabs[tabName].style.display = 'block';
+        }
+
+        // Paste button
+        pasteBtn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                longUrlInput.value = text;
+            } catch (err) {
+                showNotification('Failed to paste from clipboard', 'error');
+            }
+        });
+
+        // Bulk mode toggle
+        bulkToggleBtn.addEventListener('click', () => {
+            if (bulkMode.style.display === 'none') {
+                bulkMode.style.display = 'block';
+                longUrlInput.style.display = 'none';
+                pasteBtn.style.display = 'none';
+                shortenBtn.style.display = 'none';
+            } else {
+                bulkMode.style.display = 'none';
+                longUrlInput.style.display = 'block';
+                pasteBtn.style.display = 'block';
+                shortenBtn.style.display = 'block';
+            }
+        });
+
+        // Close bulk mode
+        closeBulkBtn.addEventListener('click', () => {
+            bulkMode.style.display = 'none';
+            longUrlInput.style.display = 'block';
+            pasteBtn.style.display = 'block';
+            shortenBtn.style.display = 'block';
+        });
+
+        // Bulk paste button
+        bulkPasteBtn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                bulkInput.value = text;
+            } catch (err) {
+                showNotification('Failed to paste from clipboard', 'error');
+            }
+        });
+
+        // Shorten single URL
+        shortenBtn.addEventListener('click', () => {
+            const longUrl = longUrlInput.value.trim();
+            
+            if (!longUrl) {
+                showNotification('Please enter a URL', 'error');
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(longUrl);
+            } catch (e) {
+                showNotification('Please enter a valid URL', 'error');
+                return;
+            }
+            
+            // Generate short code
+            const shortCode = generateShortCode();
+            const shortUrl = `${window.location.origin}${window.location.pathname}?code=${shortCode}`;
+            
+            // Display result
+            shortUrlElement.textContent = shortUrl;
+            resultContainer.style.display = 'block';
+            qrContainer.style.display = 'none';
+            
+            // Add to history
+            const newEntry = {
+                id: Date.now(),
+                longUrl,
+                shortCode,
+                shortUrl,
+                createdAt: new Date().toISOString(),
+                clicks: 0
+            };
+            
+            urlHistory.unshift(newEntry);
+            localStorage.setItem('urlHistory', JSON.stringify(urlHistory));
+            
+            // Auto copy if enabled
+            if (autoCopy) {
+                copyToClipboard(shortUrl);
+                showNotification('Copied to clipboard!');
+            }
+            
+            // Update UI
+            renderHistory();
+            updateProfileStats();
+            
+            // Clear input
+            longUrlInput.value = '';
+        });
+
+        // Shorten bulk URLs
+        bulkShortenBtn.addEventListener('click', () => {
+            const urls = bulkInput.value.trim().split('\n')
+                .map(url => url.trim())
+                .filter(url => url.length > 0);
+            
+            if (urls.length === 0) {
+                showNotification('Please enter at least one URL', 'error');
+                return;
+            }
+            
+            // Validate URLs
+            const invalidUrls = [];
+            const validUrls = [];
+            
+            urls.forEach(url => {
+                try {
+                    new URL(url);
+                    validUrls.push(url);
+                } catch (e) {
+                    invalidUrls.push(url);
+                }
+            });
+            
+            if (invalidUrls.length > 0) {
+                showNotification(`Skipped ${invalidUrls.length} invalid URLs`, 'error');
+            }
+            
+            if (validUrls.length === 0) {
+                showNotification('No valid URLs found', 'error');
+                return;
+            }
+            
+            // Shorten all valid URLs
+            bulkResults.innerHTML = '';
+            bulkResults.style.display = 'block';
+            
+            validUrls.forEach(url => {
+                const shortCode = generateShortCode();
+                const shortUrl = `${window.location.origin}${window.location.pathname}?code=${shortCode}`;
+                
+                const newEntry = {
+                    id: Date.now() + Math.random(),
+                    longUrl: url,
+                    shortCode,
+                    shortUrl,
+                    createdAt: new Date().toISOString(),
+                    clicks: 0
+                };
+                
+                urlHistory.unshift(newEntry);
+                
+                // Add to results
+                const resultItem = document.createElement('div');
+                resultItem.className = 'bulk-result-item';
+                resultItem.innerHTML = `
+                    <div class="bulk-original">${url}</div>
+                    <div class="bulk-short-url">
+                        <div class="bulk-short">${shortUrl}</div>
+                        <div class="bulk-actions">
+                            <button class="copy-btn" data-url="${shortUrl}" title="Copy to clipboard">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="qr-btn" data-url="${shortUrl}" title="Generate QR code">
+                                <i class="fas fa-qrcode"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                bulkResults.appendChild(resultItem);
+                
+                // Add event listeners to new buttons
+                const copyBtns = resultItem.querySelectorAll('.copy-btn');
+                const qrBtns = resultItem.querySelectorAll('.qr-btn');
+                
+                copyBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const url = e.currentTarget.getAttribute('data-url');
+                        copyToClipboard(url);
+                        showNotification('Copied to clipboard!');
+                    });
+                });
+                
+                qrBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const url = e.currentTarget.getAttribute('data-url');
+                        showQrCode(url);
+                    });
+                });
+            });
+            
+            localStorage.setItem('urlHistory', JSON.stringify(urlHistory));
+            renderHistory();
+            updateProfileStats();
+            showNotification(`Shortened ${validUrls.length} URLs!`);
+        });
+
+        // Copy to Clipboard
+        copyBtn.addEventListener('click', () => {
+            const shortUrl = shortUrlElement.textContent;
+            copyToClipboard(shortUrl);
+            showNotification('Copied to clipboard!');
+        });
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            });
+        }
+
+        // QR Code
+        qrBtn.addEventListener('click', () => {
+            const shortUrl = shortUrlElement.textContent;
+            showQrCode(shortUrl);
+        });
+
+        function showQrCode(url) {
+            // Clear previous QR code
+            qrCode.innerHTML = '';
+            
+            // Generate new QR code
+            currentQrCode = new QRCode(qrCode, {
+                text: url,
+                width: 160,
+                height: 160,
+                colorDark: "#1e293b",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            qrContainer.style.display = 'block';
+        }
+
+        // Generate short code
+        function generateShortCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Render History
+        function renderHistory() {
+            historyList.innerHTML = '';
+            
+            if (urlHistory.length === 0) {
+                historyList.innerHTML = '<p class="history-item">No shortened URLs yet. Create your first one!</p>';
+                return;
+            }
+            
+            urlHistory.forEach(entry => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div class="history-url">${entry.longUrl}</div>
+                    <div class="history-actions">
+                        <a href="?code=${entry.shortCode}" class="history-short" target="_blank">${entry.shortUrl}</a>
+                        <div class="history-btns">
+                            <button class="copy-btn" data-url="${entry.shortUrl}" title="Copy to clipboard">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="qr-btn" data-url="${entry.shortUrl}" title="Generate QR code">
+                                <i class="fas fa-qrcode"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                historyList.appendChild(historyItem);
+                
+                // Add event listeners
+                const copyBtn = historyItem.querySelector('.copy-btn');
+                const qrBtn = historyItem.querySelector('.qr-btn');
+                
+                copyBtn.addEventListener('click', (e) => {
+                    const url = e.currentTarget.getAttribute('data-url');
+                    copyToClipboard(url);
+                    showNotification('Copied to clipboard!');
+                });
+                
+                qrBtn.addEventListener('click', (e) => {
+                    const url = e.currentTarget.getAttribute('data-url');
+                    showQrCode(url);
+                });
+            });
+        }
+
+        // Clear History
+        clearHistoryBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all your shortened URLs?')) {
+                urlHistory = [];
+                localStorage.removeItem('urlHistory');
+                renderHistory();
+                updateProfileStats();
+                showNotification('History cleared!');
+            }
+        });
+
+        // Update Profile Stats
+        function updateProfileStats() {
+            totalLinksElement.textContent = urlHistory.length;
+            const totalClicks = urlHistory.reduce((sum, entry) => sum + (entry.clicks || 0), 0);
+            totalClicksElement.textContent = totalClicks;
+        }
+
+        // Show Notification
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = 'notification';
+            
+            if (type === 'error') {
+                notification.style.background = 'var(--error)';
+            } else {
+                notification.style.background = 'var(--success)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
